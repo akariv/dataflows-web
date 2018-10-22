@@ -1,0 +1,93 @@
+<html>
+<head>
+<title>DATAFLOWS</title>
+<link href="https://fonts.googleapis.com/css?family=Anonymous+Pro:400,700" rel="stylesheet">
+<link href="ascetic.css" rel="stylesheet">
+<style>
+body {
+    font-family: 'Anonymous Pro', monospace;
+}
+
+#main {
+    white-space: pre-wrap;
+}
+
+.tooltip {
+    cursor: pointer;
+    display: inline-block;
+    text-decoration: underline;
+}
+
+.tooltip .contents {
+    display: none;
+    white-space: pre;
+}
+
+.tooltip:hover .contents {
+    display: block;
+    position: absolute;
+    background: white;
+}
+
+</style>
+</head>
+<body>
+<div id='main'><b>D A T A F L O W S</b><span>
+=================
+
+DataFlows is a novel and intuitive way of building data processing flows in Python.
+
+- Get started quickly, easy to scale up when needed
+- Low footprint, few dependencies
+- Built for <div class='tooltip'>medium-data<div class='contents'>+--^^^-----------------------------------------------------------+
+|   - data that fits on your hard drive,                         |
+|   - is too big to load in Excel or as-is into Python,          |
+|   - not big enough to require spinning up a Hadoop cluster...  |
++----------------------------------------------------------------+
+</div></div></a> processing
+- Made for creating portable, resuable and standard based data packages.
+
+Set up from the command line in seconds:
+
+  +---  
+  |
+  |  $ pip install dataflows
+  |
+  +---
+
+              [<a href='https://github.com/datahq/dataflows'>GITHUB</a>]   [<a href='https://github.com/datahq/dataflows/blob/master/TUTORIAL.md'>TUTORIAL</a>]   [<a href='https://github.com/datahq/dataflows/blob/master/PROCESSORS.md'>REFERENCE</a>]
+
+
+<b>FEATURES</b> -
+--------
+- Trivial to set up and use on a local machine
+- Load data from nearly anywhere, put data wherever you need it
+- Easily integrates with other frameworks and tools
+- Validate input data with little effort (non-zero length, right structure, etc.)
+- Supports cache data from source and even between steps
+- Standard building blocks for common data manipulation tasks, promoting maintainable and reusable code
+- Designed for stream processing to control memory consumption
+
+<b>DATAFLOWS IS GREAT FOR</b> -
+----------------------
+- <b>EXTRACT</b>ing data from various sources
+- <b>TRANSFORM</b>ing the data using reusable building blocks and custom code
+- <b>LOAD</b>ing data into various targets files, databases etc.
+- <b>MODEL</b>ling data using the Data Package and Table Schema standards
+
+It's not an analysis tool (but it will get the data ready for analysis in your tool of choice).
+It works with any orchestration tool (cron, AirFlow or our own datapackage-pipelines).
+
+(<a href='https://xkcd.com/2054/'>obligatory xkcd</a>)
+
+<!--pre><code class='python'>
+def f():
+  print('bla')
+</code></pre-->
+
+</span>
+</div>
+<script src="highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>
