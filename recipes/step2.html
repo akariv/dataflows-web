@@ -1,0 +1,33 @@
+<b>TUTORIAL #2</b>
+-----------
+
+We can load data from a file instead:
+<pre><code class='bash'>
+$ cat beatles.csv
+name,instrument 
+john,guitar
+paul,bass
+george,guitar
+ringo,drums
+
+</code></pre>
+
+<pre><code class='python'>
+from dataflows import Flow, load
+
+def titleName(row):
+    row['name'] = row['name'].title()
+
+Flow(
+      load('beatles.csv'),
+      titleName
+).results()[0]
+
+</code></pre>
+>>> [[{'name': 'John', 'instrument': 'guitar'},
+      {'name': 'Paul', 'instrument': 'bass'},
+      {'name': 'George', 'instrument': 'guitar'},
+      {'name': 'Ringo', 'instrument': 'drums'}]]
+
+
+The source file can be a CSV file, an Excel file or a Json file. You can use a local file name or a URL for a file hosted somewhere on the web.

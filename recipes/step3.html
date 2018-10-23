@@ -1,0 +1,76 @@
+<b>TUTORIAL #3</b>
+-----------
+
+Data sources can be generators and not just lists or files. Let's take as an example a very simple scraper:
+
+<pre><code class='python'>
+from dataflows import Flow, printer
+
+from xml.etree import ElementTree
+from urllib.request import urlopen
+
+# Get from Wikipedia the population count for each country
+def country_population():
+    # Read the Wikipedia page and parse it using etree
+    page = urlopen('https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population').read()
+    tree = ElementTree.fromstring(page)
+    # Iterate on all tables, rows and cells
+    for table in tree.findall('.//table'):
+        if 'wikitable' in table.attrib.get('class', ''):
+            for row in table.find('tbody').findall('tr'):
+                cells = row.findall('td')
+                if len(cells) > 3:
+                    # If a matching row is found...
+                    name = cells[1].find('.//a').attrib.get('title')
+                    population = cells[2].text
+                    # ... yield a row with the information
+                    yield dict(
+                        name=name,
+                        population=population
+                    )
+
+Flow(
+      country_population(),
+      printer(num_rows=1)
+).process()[1]
+
+</code></pre>
+
+<b>res_1</b>:
+#    name              population
+     (string)          (string)
+---  ----------------  -------------
+1    China             1,394,770,000
+2    India             1,338,610,000
+...
+240  Pitcairn Islands  50
+
+
+
+
+This is nice, but we do prefer the numbers to be actual numbers and not strings.
+In order to do that, let's simply define their type to be numeric and truncate to millions:
+
+<pre><code class='python'>
+from dataflows import Flow, set_type
+
+Flow(
+    country_population(),
+    set_type('population', type='number', groupChar=','),
+    lambda row: dict(row, population=row['population']/1000000),
+    printer(num_rows=1)
+).process()[1]
+
+</code></pre>
+
+<b>res_1</b>:
+#    name                population
+     (string)              (number)
+---  ----------------  ------------
+1    China                 1394.77
+2    India                 1338.61
+...
+240  Pitcairn Islands         5e-05
+
+
+Data is automatically converted to the correct native Python type.

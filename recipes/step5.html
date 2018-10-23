@@ -1,0 +1,52 @@
+<b>TUTORIAL #5</b>
+-----------
+
+So far we've seen how to load data, process it row by row, and then inspect the results or store them in a data package.
+Let's see how we can do more complex processing by manipulating the entire data stream:
+
+<pre><code class='python'>
+from dataflows import Flow, set_type, dump_to_path, printer
+
+# Generate all triplets (a,b,c) so that 1 <= a <= b < c <= 20
+def all_triplets():
+    for a in range(1, 20):
+        for b in range(a, 20):
+            for c in range(b+1, 21):
+                yield dict(a=a, b=b, c=c)
+
+# Yield row only if a^2 + b^2 == c^1
+def filter_pythagorean_triplets(rows):
+    for row in rows:
+        if row['a']**2 + row['b']**2 == row['c']**2:
+            yield row
+
+Flow(
+    all_triplets(),
+    set_type('a', type='integer'),
+    set_type('b', type='integer'),
+    set_type('c', type='integer'),
+    filter_pythagorean_triplets,
+    dump_to_path('pythagorean_triplets'),
+    printer(num_rows=1)
+).process()[1]
+
+</code></pre>
+
+<b>res_1</b>:
+#              a            b            c
+       (integer)    (integer)    (integer)
+---  -----------  -----------  -----------
+1              3            4            5
+2              5           12           13
+...
+6             12           16           20
+
+{'count_of_rows': 6, 'bytes': 744, 'hash': '1f0df7ed401ccff9f6c1674e98c62467', 'dataset_name': None}
+
+
+The `filter_pythagorean_triplets` function takes an iterator of rows, and yields only the ones that pass its condition. 
+
+The flow framework knows whether a function is meant to hande a single row or a row iterator based on its parameters: 
+- if it accepts a single `row` parameter, then it's a row processor.
+- if it accepts a single `rows` parameter, then it's a rows processor.
+- if it accepts a single `package` parameter, then it's a package processor.

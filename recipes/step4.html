@@ -1,0 +1,52 @@
+<b>TUTORIAL #4</b>
+-----------
+
+Apart from data-types, it's also possible to set other constraints to the data. If the data fails validation (or does not fit the assigned data-type) an exception will be thrown - making this method highly effective for validating data and ensuring data quality. 
+What about large data files? In the above examples, the results are loaded into memory, which is not always preferrable or acceptable. In many cases, we'd like to store the results directly onto a hard drive - without having the machine's RAM limit in any way the amount of data we can process.
+We do it by using <b>dump</b> processors:
+
+<pre><code class='python'>
+from dataflows import Flow, set_type, dump_to_path
+
+Flow(
+    country_population(),
+    set_type('population', type='number', groupChar=','),
+    dump_to_path('country_population')
+).process()[1]
+
+</code></pre>
+
+    {'count_of_rows': 240,
+     'bytes': 5277,
+     'hash': 'b293685b58a33bd7b02cc275d19d3a95',
+     'dataset_name': None}
+
+
+Running this code will create a local directory called `county_population`, containing two files:
+<pre><code class='python'>
+import glob
+print("\n".join(glob.glob('country_population/*')))
+
+</code></pre>
+
+    country_population/res_1.csv
+    country_population/datapackage.json
+
+
+
+The CSV file - `res_1.csv` - is where the data is stored. The `datapackage.json` file is a metadata file, holding information about the data, including its schema.
+We can now open the CSV file with any spreadsheet program or code library supporting the CSV format - or using one of the <b>data package</b> libraries out there, like so:
+
+<pre><code class='python'>
+from datapackage import Package
+pkg = Package('country_population/datapackage.json')
+it = pkg.resources[0].iter(keyed=True)
+print(next(it))
+
+</code></pre>
+
+    {'name': 'China', 'population': Decimal('1394720000')}
+
+
+Note how using the data package meta-data, data-types are restored and there's no need to 're-parse' the data. This also works with other types too, such as dates, booleans and even `list`s and `dict`s.
+

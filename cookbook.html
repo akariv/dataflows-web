@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>DATAFLOWS</title>
+<link href="https://fonts.googleapis.com/css?family=Anonymous+Pro:400,700" rel="stylesheet">
+<link href="ascetic.css" rel="stylesheet">
+<link href="recipes.css" rel="stylesheet">
+<style>
+body {
+    font-family: 'Anonymous Pro', monospace;
+    display: flex;
+    flex-flow: row;
+    white-space: pre-wrap;
+}
+
+#toc {
+    flex: 0 0 auto;
+}
+
+#sep {
+    margin: 0 10px 0 -9px;
+    flex: 0 0 auto;
+}
+
+#content {
+    flex: 1 0 auto;
+    max-width: 800px;
+}
+
+</style>
+</head>
+<body>
+<div id='toc'>&lt;&lt; <a href='/'>back</a>
+
+TUTORIAL
+  <a href='#cli'>The CLI</a>
+  <a href='#step1'>Step 1</a>
+  <a href='#step2'>Step 2</a>
+  <a href='#step3'>Step 3</a>
+  <a href='#step4'>Step 4</a>
+  <a href='#step5'>Step 5</a>
+  <a href='#step6'>Step 6</a>
+
+STANDARD PROCESSORS
+
+  Load and save data
+    <a href='#load'>load</a>
+    <a href='#printer'>printer</a>
+    <a href='#dump_to_path'>dump_to_path</a>
+    <a href='#dump_to_zip'>dump_to_zip</a>
+    <a href='#dump_to_sql'>dump_to_sql</a>
+    <a href='#checkpoint'>checkpoint</a>
+
+  Manipulate row-by-row
+    <a href='#add_field'>add_field</a>
+    <a href='#delete_fields'>delete_fields</a>
+    <a href='#add_computed_field'>add_computed_field</a>
+    <a href='#find_replace'>find_replace</a>
+    <a href='#set_type'>set_type</a>
+    <a href='#validate'>validate</a>
+
+  Manipulate a resource
+    <a href='#sort_rows'>sort_rows</a>
+    <a href='#unpivot'>unpivot</a>
+    <a href='#filter_rows'>filter_rows</a>
+
+  Manipulate package
+    <a href='#update_package'>update_package</a>
+    <a href='#update_resource'>update_resource</a>
+    <a href='#concatenate'>concatenate</a>
+    <a href='#duplicate'>duplicate</a>
+
+------------------------+
+</div>
+<div id='sep'></div>
+<div id='content'>
+</div>
+</body>
+<script src="highlight.pack.js"></script>
+<script>
+    var lines = document.getElementById('toc').innerHTML.match(new RegExp('\n', 'g')).length - 1;
+    for (var i=0 ; i<lines ; i++) document.getElementById('sep').innerHTML += '|<br/>';
+    function updatehash() {
+        var url = window.location.hash.replace('#', 'recipes/') + '.html';
+        fetch(url)
+            .then(function(response) { return response.text(); })
+            .then(function(text) { 
+                document.getElementById('content').innerHTML = text; 
+                for (let i of document.querySelectorAll('#content code')) {
+                    hljs.highlightBlock(i);
+                }
+            });
+    }
+    window.addEventListener("hashchange", updatehash, false);
+    if (!window.location.hash) {
+        window.location.hash = '#step1';
+    } else {
+        updatehash();
+    }
+</script>
+</html>

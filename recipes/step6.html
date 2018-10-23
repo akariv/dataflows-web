@@ -1,0 +1,201 @@
+<b>TUTORIAL #6</b>
+-----------
+
+Let's see a few examples of what we can do with a package processors.
+
+First, let's add a field to the data:
+
+<pre><code class='python'>
+from dataflows import Flow, load, dump_to_path, printer
+
+def add_is_guitarist_column_to_schema(package):
+    # Add a new field to the first resource
+    package.pkg.descriptor['resources'][0]['schema']['fields'].append(dict(
+        name='is_guitarist',
+        type='boolean'
+    ))
+    # Must yield the modified datapackage
+    yield package.pkg
+    # And its resources
+    yield from package
+
+def add_is_guitarist_column(row):
+    row['is_guitarist'] = row['instrument'] == 'guitar'
+
+Flow(
+    # Same one as above
+    load('beatles.csv'),
+    add_is_guitarist_column_to_schema,
+    add_is_guitarist_column,
+    dump_to_path('beatles_guitarists'),
+    printer(num_rows=1)
+).process()[1]
+
+</code></pre>
+<b>beatles</b>:
+#    name        instrument    is_guitarist
+     (string)    (string)      (boolean)
+---  ----------  ------------  --------------
+1    john        guitar        True
+2    paul        bass          False
+...
+4    ringo       drums         False
+
+{'count_of_rows': 4, 'bytes': 896, 'hash': 'ae319bad0ad1e345a2a86d8dc9de8375', 'dataset_name': None}
+
+
+
+In this example we used two steps - one for adding the new field (`is_guitarist`) to the schema and another step to modify the actual data.
+We can combine the two into one step:
+
+<pre><code class='python'>
+from dataflows import Flow, load, dump_to_path
+
+def add_is_guitarist_column(package):
+
+    # Add a new field to the first resource
+    package.pkg.descriptor['resources'][0]['schema']['fields'].append(dict(
+        name='is_guitarist',
+        type='boolean'
+    ))
+
+    # Must yield the modified datapackage
+    yield package.pkg
+
+    # Now iterate on all resources
+    resources = iter(package)
+
+    # Take the first resource
+    beatles = next(resources)
+
+    # And yield it with with the modification
+    def f(row):
+        row['is_guitarist'] = row['instrument'] == 'guitar'
+        return row
+    yield map(f, beatles)
+
+Flow(
+    # Same one as above
+    load('beatles.csv'),
+    add_is_guitarist_column,
+    dump_to_path('beatles_guitarists'),
+    printer(num_rows=1)
+).process()[1]
+
+</code></pre>
+<b>beatles</b>:
+#    name        instrument    is_guitarist
+     (string)    (string)      (boolean)
+---  ----------  ------------  --------------
+1    john        guitar        True
+2    paul        bass          False
+...
+4    ringo       drums         False
+
+{'count_of_rows': 4, 'bytes': 896, 'hash': 'ae319bad0ad1e345a2a86d8dc9de8375', 'dataset_name': None}
+
+
+
+The contract for the `package` processing function is simple:
+
+- First modify `package.pkg` (which is a `Package` instance) and yield it.
+- Then, yield any resources that should exist on the output, with or without modifications.
+
+In the next example we're removing an entire resource in a package processor - this next one filters the list of Academy Award nominees to those who won both the Oscar and an Emmy award:
+
+<pre><code class='python'>
+from dataflows import Flow, load, dump_to_path, checkpoint, printer
+
+def find_double_winners(package):
+
+    # Remove the emmies resource - 
+    #    we're going to consume it now
+    package.pkg.remove_resource('emmies')
+
+    # Must yield the modified datapackage
+    yield package.pkg
+
+    # Now iterate on all resources
+    resources = iter(package)
+
+    # Emmies is the first - 
+    # read all its data and create a set of winner names
+    emmy = next(resources)
+    emmy_winners = set(
+        map(lambda x: x['nominee'], 
+            filter(lambda x: x['winner'],
+                   emmy))
+    )
+
+    # Oscars are next - 
+    # filter rows based on the emmy winner set
+    academy = next(resources)
+    yield filter(lambda row: (row['Winner'] and 
+                              row['Name'] in emmy_winners),
+                 academy)
+
+    # important to deque generators to ensure finalization steps of previous processors are executed
+    yield from resources
+
+Flow(
+    # Emmy award nominees and winners
+    load('https://raw.githubusercontent.com/datahq/dataflows/master/data/emmy.csv', name='emmies'),
+    # Academy award nominees and winners
+    load('https://raw.githubusercontent.com/datahq/dataflows/master/data/academy.csv', encoding='utf8', name='oscars'),
+    # save a checkpoint so we won't have to re-download the source data each time
+    checkpoint('emmy-academy-nominees-winners'),
+    find_double_winners,
+    dump_to_path('double_winners'),
+    printer(num_rows=1)
+).process()[1]
+
+</code></pre>
+
+saving checkpoint to: .checkpoints/emmy-academy-nominees-winners
+<b>oscars</b>:
+#    Year           Ceremony  Award               Winner  Name               Film
+     (string)      (integer)  (string)          (string)  (string)           (string)
+---  ----------  -----------  --------------  ----------  -----------------  --------------------------
+1    1931/1932             5  Actress                  1  Helen Hayes        The Sin of Madelon Claudet
+2    1932/1933             6  Actress                  1  Katharine Hepburn  Morning Glory
+...
+98   2015                 88  Honorary Award           1  Gena Rowlands
+checkpoint saved: emmy-academy-nominees-winners
+{'count_of_rows': 98, 'bytes': 6921, 'hash': '902088336aa4aa4fbab33446a241b5de', 'dataset_name': None}
+
+Previous flow was a bit complicated, but luckily we have the `join`, `concatenate` and `filter_rows` processors which make such combinations a snap
+
+<pre><code class='python'>
+from dataflows import Flow, load, dump_to_path, join, concatenate, filter_rows, printer, checkpoint
+
+Flow(
+    # load from the checkpoint we saved in the previous flow
+    checkpoint('emmy-academy-nominees-winners'),
+    filter_rows(equals=[dict(winner=1)], resources=['emmies']),
+    concatenate(
+        dict(emmy_nominee=['nominee'],),
+        dict(name='emmies_filtered'),
+        resources='emmies'
+    ),
+    join(
+        'emmies_filtered', ['emmy_nominee'],  # Source resource
+        'oscars', ['Name'],                   # Target resource
+        full=False   # Don't add new fields, remove unmatched rows
+    ),
+    filter_rows(equals=[dict(Winner='1')]),
+    dump_to_path('double_winners'),
+    printer(num_rows=1)
+).process()[1]
+
+</code></pre>
+
+using checkpoint data from .checkpoints/emmy-academy-nominees-winners
+<b>oscars</b>:
+#    Year           Ceremony  Award               Winner  Name               Film
+     (string)      (integer)  (string)          (string)  (string)           (string)
+---  ----------  -----------  --------------  ----------  -----------------  --------------------------
+1    1931/1932             5  Actress                  1  Helen Hayes        The Sin of Madelon Claudet
+2    1932/1933             6  Actress                  1  Katharine Hepburn  Morning Glory
+...
+98   2015                 88  Honorary Award           1  Gena Rowlands
+{'count_of_rows': 98, 'bytes': 6921, 'hash': '902088336aa4aa4fbab33446a241b5de', 'dataset_name': None}

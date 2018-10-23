@@ -1,0 +1,24 @@
+<b>TUTORIAL #1</b>
+-----------
+
+Let's start with the traditional 'hello, world' example:
+
+<pre><code class='python'>
+from dataflows import Flow
+
+data = [
+  {'data': 'Hello'},
+  {'data': 'World'}
+]
+
+def lowerData(row):
+    row['data'] = row['data'].lower()
+
+Flow(
+      data,
+      lowerData
+).results()[0]
+</code></pre>
+>>> [[{'data': 'hello'}, {'data': 'world'}]]
+
+This very simple flow takes a list of `dict`s and applies a row processing function on each one of them.

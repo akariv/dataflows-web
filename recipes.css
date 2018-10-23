@@ -1,0 +1,15 @@
+body {
+    font-family: 'Anonymous Pro', monospace;
+    width: auto;
+    white-space: pre-wrap;
+}
+
+.hljs {
+    background-color: #eee !important;
+}
+
+pre code {
+    display: inline-block !important;
+    margin: 0 10px !important;
+    padding: 0 20px !important;
+}
