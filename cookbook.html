@@ -87,7 +87,13 @@ COMMON PATTERNS &amp; TIPS
     function updatehash() {
         var url = window.location.hash.replace('#', 'recipes/').replace('.', '/') + '.html';
         fetch(url)
-            .then(function(response) { return response.text(); })
+            .then(function(response) { 
+                if (response.status == 200) {
+                    return response.text();
+                } else {
+                    return '<center><h1><br/><br/>' + response.status + '</h1><h2>Failed to load this page</h2></center>';
+                }
+            })
             .then(function(text) { 
                 document.getElementById('content').innerHTML = text; 
                 for (let i of document.querySelectorAll('#content code')) {
