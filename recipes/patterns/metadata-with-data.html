@@ -1,0 +1,17 @@
+<b>Generator passing a schema along with the data</b>
+----------------------------------------------
+
+(based on <a href='https://github.com/datahq/dataflows/issues/55'>https://github.com/datahq/dataflows/issues/55</a>)
+
+A wrapper function which takes a schema and a generator and outputs the generator's data with the table schema:
+
+<pre><code class='python'>
+def with_schema(generator, schema):
+   def func(package):
+       descriptor = dict(name='gen', path='gen.csv', schema=schema)
+       package.pkg.add_resource(descriptor)
+       yield package.pkg
+       yield from package
+       yield generator
+   return func
+</code></pre>
