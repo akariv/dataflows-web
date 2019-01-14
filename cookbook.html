@@ -34,44 +34,47 @@ body {
 <div id='toc'>&lt;&lt; <a href='/'>back</a>
 
 TUTORIAL
-  <a href='#cli'>The CLI</a>
-  <a href='#step1'>Step 1</a>
-  <a href='#step2'>Step 2</a>
-  <a href='#step3'>Step 3</a>
-  <a href='#step4'>Step 4</a>
-  <a href='#step5'>Step 5</a>
-  <a href='#step6'>Step 6</a>
+  <a href='#tutorial.cli'>The CLI</a>
+  <a href='#tutorial.step1'>Step 1</a>
+  <a href='#tutorial.step2'>Step 2</a>
+  <a href='#tutorial.step3'>Step 3</a>
+  <a href='#tutorial.step4'>Step 4</a>
+  <a href='#tutorial.step5'>Step 5</a>
+  <a href='#tutorial.step6'>Step 6</a>
 
 STANDARD PROCESSORS
 
   Load and save data
-    <a href='#load'>load</a>
-    <a href='#printer'>printer</a>
-    <a href='#dump_to_path'>dump_to_path</a>
-    <a href='#dump_to_zip'>dump_to_zip</a>
-    <a href='#dump_to_sql'>dump_to_sql</a>
-    <a href='#checkpoint'>checkpoint</a>
+    <a href='#stdlib.load'>load</a>
+    <a href='#stdlib.printer'>printer</a>
+    <a href='#stdlib.dump_to_path'>dump_to_path</a>
+    <a href='#stdlib.dump_to_zip'>dump_to_zip</a>
+    <a href='#stdlib.dump_to_sql'>dump_to_sql</a>
+    <a href='#stdlib.checkpoint'>checkpoint</a>
 
   Manipulate row-by-row
-    <a href='#add_field'>add_field</a>
-    <a href='#delete_fields'>delete_fields</a>
-    <a href='#add_computed_field'>add_computed_field</a>
-    <a href='#find_replace'>find_replace</a>
-    <a href='#set_type'>set_type</a>
-    <a href='#validate'>validate</a>
+    <a href='#stdlib.add_field'>add_field</a>
+    <a href='#stdlib.delete_fields'>delete_fields</a>
+    <a href='#stdlib.add_computed_field'>add_computed_field</a>
+    <a href='#stdlib.find_replace'>find_replace</a>
+    <a href='#stdlib.set_type'>set_type</a>
+    <a href='#stdlib.validate'>validate</a>
 
   Manipulate a resource
-    <a href='#sort_rows'>sort_rows</a>
-    <a href='#unpivot'>unpivot</a>
-    <a href='#filter_rows'>filter_rows</a>
+    <a href='#stdlib.sort_rows'>sort_rows</a>
+    <a href='#stdlib.unpivot'>unpivot</a>
+    <a href='#stdlib.filter_rows'>filter_rows</a>
 
   Manipulate package
-    <a href='#update_package'>update_package</a>
-    <a href='#update_resource'>update_resource</a>
-    <a href='#concatenate'>concatenate</a>
-    <a href='#duplicate'>duplicate</a>
+    <a href='#stdlib.update_package'>update_package</a>
+    <a href='#stdlib.update_resource'>update_resource</a>
+    <a href='#stdlib.concatenate'>concatenate</a>
+    <a href='#stdlib.duplicate'>duplicate</a>
 
-------------------------+
+COMMON PATTERNS &amp; TIPS
+    <a href='#patterns.metadata-with-data'>Schema &amp; data from gen.</a>
+  
+----------------------------+
 </div>
 <div id='sep'></div>
 <div id='content'>
@@ -82,7 +85,7 @@ STANDARD PROCESSORS
     var lines = document.getElementById('toc').innerHTML.match(new RegExp('\n', 'g')).length - 1;
     for (var i=0 ; i<lines ; i++) document.getElementById('sep').innerHTML += '|<br/>';
     function updatehash() {
-        var url = window.location.hash.replace('#', 'recipes/') + '.html';
+        var url = window.location.hash.replace('#', 'recipes/').replace('.', '/') + '.html';
         fetch(url)
             .then(function(response) { return response.text(); })
             .then(function(text) { 
@@ -94,7 +97,7 @@ STANDARD PROCESSORS
     }
     window.addEventListener("hashchange", updatehash, false);
     if (!window.location.hash) {
-        window.location.hash = '#step1';
+        window.location.hash = '#tutorial.step1';
     } else {
         updatehash();
     }
