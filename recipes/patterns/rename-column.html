@@ -1,9 +1,13 @@
 <b>Renaming a column</b>
 -----------------
 
-(based on <a href='https://github.com/datahq/dataflows/issues/55'>https://github.com/datahq/dataflows/issues/55</a>)
+(based on <a href='https://github.com/datahq/dataflows/issues/74'>https://github.com/datahq/dataflows/issues/74</a>)
 
-A wrapper function which takes a datapackage and renames one of the columns:
+You can always use the <pre>concatenate</pre> processor for selecting and renaming columns, 
+however if you want to rename jsut one column in one resource, you could write a processor such as this 
+(more or less) generic one -
+
+A processor which takes a datapackage and renames one of the columns:
 
 <pre><code class='python'>
 from dataflows.helpers import ResourceMatcher
@@ -36,7 +40,7 @@ def rename_column(from_name, to_name, resources=None):
            rename_column('a','q',resources='res_1'),
            D.printer()
     ).process()
-    
+
 res_1:
   #            q            b
        (integer)    (integer)
