@@ -1,0 +1,52 @@
+<b>Renaming a column</b>
+-----------------
+
+(based on <a href='https://github.com/datahq/dataflows/issues/55'>https://github.com/datahq/dataflows/issues/55</a>)
+
+A wrapper function which takes a datapackage and renames one of the columns:
+
+<pre><code class='python'>
+from dataflows.helpers import ResourceMatcher
+
+def rename_column(from_name, to_name, resources=None):
+    def renamer(rows):
+        for row in rows:
+            yield dict(
+                (k if k != from_name else to_name, v) for k, v in row.items()
+            )
+    def func(package):
+        matcher = ResourceMatcher(resources, package.pkg)
+        for resource in package.pkg.descriptor['resources']:
+            if matcher.match(resource['name']):
+                for field in resource.get('schema', {}).get('fields', []):
+                    if field['name'] == from_name:
+                        field['name'] = to_name
+        yield package.pkg
+        for res in package:
+            if matcher.match(res.res.name):
+                yield renamer(res)
+            else:
+                yield res
+    return func
+
+
+>>> import dataflows as D
+>>> D.Flow([{'a':1, 'b':2}, {'a':3, 'b':4}],
+           [{'a':1, 'b':2}, {'a':3, 'b':4}],
+           rename_column('a','q',resources='res_1'),
+           D.printer()
+    ).process()
+    
+res_1:
+  #            q            b
+       (integer)    (integer)
+---  -----------  -----------
+  1            1            2
+  2            3            4
+res_2:
+  #            a            b
+       (integer)    (integer)
+---  -----------  -----------
+  1            1            2
+  2            3            4
+</code></pre>
